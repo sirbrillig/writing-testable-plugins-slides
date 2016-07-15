@@ -1,0 +1,493 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		<style>
+.reveal .attribution {
+	font-size: 0.55em;
+}
+.reveal .nope {
+	color: #f94a4a;
+}
+.reveal .yay {
+	color: #61ff61;
+}
+.reveal blockquote {
+	width: auto;
+	font-size: 0.9em;
+}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section data-markdown>
+					<script type="text/template">
+# Writing Testable Plugins
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Who am I?
+
+Payton Swick
+
+Code Wrangler at Automattic<br/>
+(we make WordPress.com)
+
+@sirbrillig
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### What is a unit test?
+
+<p class="fragment">
+Code to test that one piece of a system operates as expected.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+There are units of different sizes.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Database tests are a big unit. Function tests are a small unit.<br/> Focus on the small.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Smaller systems are easier to understand.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+It's nice to be able to test a plugin<br/> *without* WordPress.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p>You might not need unit tests!</p>
+<p>(But it can't hurt!)</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### What is a unit test?
+
+Unit tests check the *output* for a given *input*.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### What is testable code?
+
+Code that makes it easy to test one thing in isolation.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Isolation is the hard part.<br/> Most code has dependencies and side effects.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Dependencies:<br/> this code's *input* is not just in its arguments.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+To reduce dependencies:
+
+<p class="fragment">
+1. Put them in variables that can be overridden.
+</p>
+<p class="fragment">
+2. Pass inputs to your functions rather than having your function fetch the input.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Side Effects:<br/> this code's *output* is not just in its return value.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+To reduce side effects:
+<p class="fragment">
+1. Have each function do just one thing.
+</p>
+<p class="fragment">
+2. Make more (specific) classes and functions.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### Payton's <span class="yay">Testable</span> Precepts
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 1:<br/>
+Always use classes, never global functions.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+function otherpages_add_shortcode() {
+...
+}
+```
+
+<p class="yay">Yay!</p>
+```php
+class Otherpages {
+	public function add_shortcode() {
+	...
+	}
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+One class to do one thing.<br/> Don't be afraid of too many classes.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Where two classes interact, we can place a *mock*.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Mocks:<br/>
+fake objects or functions that behave in a way we can control.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+A simple mock object is just a `new StdClass()`,<br/>
+and a simple mock function is just a `function`,<br/>
+but I'll suggest a library called `Spies`.
+
+https://github.com/sirbrillig/spies
+
+(I wrote it.)
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+I'll talk more about spies in a bit.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 2:<br/>
+Don't use static functions except as generators.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Why are static methods risky?<br/> They cannot easily be mocked.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+A singleton generator is fine, but only use it when necessary.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 3:<br/>
+Use instance variables as constants. Avoid using static variables or `define`.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Instance variables are just as hidden during normal use, but can be changed during runtime to produce different effects.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 4:<br/>
+Use filters to pass data indirectly.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+When passing data between classes, pass it explicitly as function input, but to pass it indirectly, use a filter.<br/> Filters can be mocked.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 5:<br/>
+Use verbs in all function names.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Isn't that just style?
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+A function name should tell you what inputs and outputs are expected.
+
+<p class="fragment">
+Some great verbs are<br/> `get`, `is`, `update`, `create`, `remove`.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+If a function does too many things to name, consider splitting it.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 6:<br/>
+Keep functions below ten lines<br/> and indentation below four levels.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Shorter functions are easier to understand.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p>Use `array_map`, `array_filter`, `array_reduce`, etc.</p><p> instead of `while`, `for`, and `foreach`.</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 7:<br/>
+Consider all possible inputs and outputs.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Check for errors from external functions.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Functions can assume the existence and type of the data, but only if you control the data.
+<p class="fragment">
+Not sure if you control the data? Test the inputs anyway. Then you don't have to think about it.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 8:<br/>
+Whenever possible, write tests first.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Tested code gives us confidence.
+<p class="fragment">
+It will work the way we expect.
+</p>
+<p class="fragment">
+(We have defined our expectations.)
+</p>
+<p class="fragment">
+It can be refactored safely.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 9:<br/>
+Don't test the code from other libraries,<br/> but test the inputs and outputs.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+We can assume that WordPress works.<br/> (Otherwise we have bigger problems!)
+
+<p class="fragment">
+But we should make sure that we are using WordPress the way we expect.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+We can test the inputs to external functions with *spies*.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### What is a Spy?
+An object that behaves like a function and which we can query to learn how it was called.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+```php
+$spy = \Spies\get_spy_for( 'add_shortcode' );
+
+add_shortcode(
+	'otherpages',
+	'get_markup_from_shortcode'
+);
+
+$this->assertTrue(
+	$spy->was_called_with(
+		'otherpages',
+		\Spies\any()
+	);
+);
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Precept 10:<br/>
+Write only one assertion per test.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+A unit is one thing.<br/> A unit test should test that one thing.<br/> One function's *one input* and *one output*.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Can a function have more than one input or output?<br/> Write more than one test.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+> "Unit tests isolate failures. Even if a product contains millions of lines of code, if a unit test fails, you only need to search that small unit under test to find the bug."
+
+<p class="attribution">
+https://googletesting.blogspot.co.uk/2015/04/just-say-no-to-more-end-to-end-tests.html
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Isolate the code you are testing from the rest of the system using mocks.<br/> You want to control the *inputs* and *outputs*, including dependencies and side effects.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Code is hard. You can't predict all possible situations.
+<p class="fragment">
+When you find a bug, write a test that causes it, and then fix the bug so the test passes.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Big thanks to the WordPress.com REST API test suite, and all its overworked, under-appreciated maintainers.
+<p class="fragment">
+And big thanks to *you* for coming!
+</p>
+					</script>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
