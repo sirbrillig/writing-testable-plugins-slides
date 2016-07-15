@@ -143,6 +143,15 @@ To reduce dependencies:
 
 				<section data-markdown>
 					<script type="text/template">
+Allowing dependencies to be overwritten is called "Dependency Injection".<br/>
+<p class="fragment">
+Tests can isolate one file from another by replacing the dependencies.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 Side Effects:<br/> this code's *output* is not just in its return value.
 					</script>
 				</section>
@@ -206,7 +215,7 @@ Where two classes interact, we can place a *mock*.
 
 				<section data-markdown>
 					<script type="text/template">
-Mocks:<br/>
+Mocks (aka Stubs):<br/>
 fake objects or functions that behave in a way we can control.
 					</script>
 				</section>
@@ -225,7 +234,21 @@ https://github.com/sirbrillig/spies
 
 				<section data-markdown>
 					<script type="text/template">
-I'll talk more about spies in a bit.
+Code getting input from a dependency:
+```php
+function get_the_content( id ) {
+	$post = get_post( id );
+	return $post->post_content;
+}
+```
+Test with a mock dependency:
+```php
+\Spies\mock_function( 'get_post' )->that_returns(
+	(object) [ 'ID' => 123, 'post_content' => 'hello' ]
+);
+$result = get_the_content( 123 );
+$this->assertEquals( 'hello', $result );
+```
 					</script>
 				</section>
 
@@ -442,12 +465,6 @@ Can a function have more than one input or output?<br/> Write more than one test
 <p class="attribution">
 https://googletesting.blogspot.co.uk/2015/04/just-say-no-to-more-end-to-end-tests.html
 </p>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-Isolate the code you are testing from the rest of the system using mocks.<br/> You want to control the *inputs* and *outputs*, including dependencies and side effects.
 					</script>
 				</section>
 
