@@ -34,6 +34,9 @@
 	width: auto;
 	font-size: 0.9em;
 }
+.reveal .precept {
+	color: #61ff61;
+}
 		</style>
 	</head>
 	<body>
@@ -102,9 +105,11 @@ It's nice to be able to test a plugin<br/> *without* WordPress.
 
 				<section data-markdown>
 					<script type="text/template">
-### What is a unit test?
+### What is a unit test? (pt. 2)
 
+<p class="fragment">
 Unit tests check the *output* for a given *input*.
+</p>
 					</script>
 				</section>
 
@@ -112,7 +117,7 @@ Unit tests check the *output* for a given *input*.
 					<script type="text/template">
 ### What is testable code?
 
-Code that makes it easy to test one thing in isolation.
+Code that makes it easy to test input and output in isolation.
 					</script>
 				</section>
 
@@ -133,11 +138,63 @@ Dependencies:<br/> this code's *input* is not just in its arguments.
 To reduce dependencies:
 
 <p class="fragment">
-1. Put them in variables that can be overridden.
+1. Put dependencies in variables that can be overridden.
 </p>
 <p class="fragment">
-2. Pass inputs to your functions rather than having your function fetch the input.
+2. Pass input to your functions rather than having your function fetch input.
 </p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+function update_post_status( $post_id ) {
+	$post = get_post( $post_id );
+	$post->post_status = 'publish';
+	return wp_update_post( $post );
+}
+
+update_post_status( 123 );
+```
+<p class="yay">Yay!</p>
+```php
+function update_post_status( $post ) {
+	$post->post_status = 'publish';
+	return wp_update_post( $post );
+}
+
+update_post_status( get_post( 123 ) );
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+class MyPlugin {
+	function update_post_status( $post_id ) {
+		$updater = new Updater();
+		$updater->update_post( $post_id );
+	}
+}
+```
+<p class="yay">Yay!</p>
+```php
+class MyPlugin {
+	public $updater;
+
+	public function __construct( $updater = null ) {
+		$this->updater = $updater ? $updater : new Updater();
+	}
+
+	public function update_post_status( $post_id ) {
+		$this->updater->update_post( $post_id );
+	}
+}
+```
 					</script>
 				</section>
 
@@ -145,7 +202,7 @@ To reduce dependencies:
 					<script type="text/template">
 Allowing dependencies to be overwritten is called "Dependency Injection".<br/>
 <p class="fragment">
-Tests can isolate one file from another by replacing the dependencies.
+Tests can isolate one part of code from another by replacing the dependencies.
 </p>
 					</script>
 				</section>
@@ -170,13 +227,44 @@ To reduce side effects:
 
 				<section data-markdown>
 					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+function update_post_data( $post ) {
+	$post->post_status = 'publish';
+	$post->post_excerpt = substr( $post->post_content, 0, 140 );
+	return wp_update_post( $post );
+}
+
+update_post_data( $post );
+```
+<p class="yay">Yay!</p>
+```php
+function update_post_status( $post ) {
+	$post->post_status = 'publish';
+	return $post;
+}
+
+function update_post_excerpt( $post ) {
+	$post->post_excerpt = substr( $post->post_content, 0, 140 );
+	return $post;
+}
+
+$post = update_post_status( get_post( 123 ) );
+$post = update_post_excerpt( $post );
+wp_update_post( $post );
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 ### Payton's <span class="yay">Testable</span> Precepts
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 1:<br/>
+<p class="precept">Precept 1:</p>
 Always use classes, never global functions.
 					</script>
 				</section>
@@ -234,14 +322,14 @@ https://github.com/sirbrillig/spies
 
 				<section data-markdown>
 					<script type="text/template">
-Code getting input from a dependency:
+Code getting input from a function dependency:
 ```php
 function get_the_content( id ) {
 	$post = get_post( id );
 	return $post->post_content;
 }
 ```
-Test with a mock dependency:
+Test with a mock function dependency:
 ```php
 \Spies\mock_function( 'get_post' )->that_returns(
 	(object) [ 'ID' => 123, 'post_content' => 'hello' ]
@@ -254,7 +342,37 @@ $this->assertEquals( 'hello', $result );
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 2:<br/>
+Code getting input from an object dependency:
+```php
+class MyPlugin {
+	public $getter;
+
+	public function __construct( $getter = null ) {
+		$this->getter = $getter ? $getter : new Getter();
+	}
+
+	public function get_data_content() {
+		$post = $this->getter->get_post();
+		return $post->post_content;
+	}
+}
+```
+Test with a mock object dependency:
+```php
+$getter = \Spies\mock_object();
+$getter->add_method( 'get_post' )->that_returns(
+	(object) [ 'ID' => 123, 'post_content' => 'hello' ]
+);
+$plugin = new MyPlugin( $getter );
+$result = $plugin->get_data_content();
+$this->assertEquals( 'hello', $result );
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="precept">Precept 2:</p>
 Don't use static functions except as generators.
 					</script>
 				</section>
@@ -267,13 +385,43 @@ Why are static methods risky?<br/> They cannot easily be mocked.
 
 				<section data-markdown>
 					<script type="text/template">
-A singleton generator is fine, but only use it when necessary.
+Generators are ok.
+
+```php
+class MyPlugin {
+	public $getter;
+
+	public function __construct( $getter ) {
+		$this->getter = $getter;
+	}
+
+	public static function get_instance() {
+		return new MyPlugin( new Getter() );
+	}
+}
+```
+Generators don't always need to be tested.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 3:<br/>
+Static functions that have no dependencies and no side-effects are ok.
+
+```php
+class MyPlugin {
+	public static function is_published_post( $post ) {
+		return $post->post_status === 'publish';
+	}
+}
+```
+These can be tested without mocks.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="precept">Precept 3:</p>
 Use instance variables as constants. Avoid using static variables or `define`.
 					</script>
 				</section>
@@ -286,7 +434,7 @@ Instance variables are just as hidden during normal use, but can be changed duri
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 4:<br/>
+<p class="precept">Precept 4:</p>
 Use filters to pass data indirectly.
 					</script>
 				</section>
@@ -299,7 +447,7 @@ When passing data between classes, pass it explicitly as function input, but to 
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 5:<br/>
+<p class="precept">Precept 5:</p>
 Use verbs in all function names.
 					</script>
 				</section>
@@ -328,7 +476,7 @@ If a function does too many things to name, consider splitting it.
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 6:<br/>
+<p class="precept">Precept 6:</p>
 Keep functions below ten lines<br/> and indentation below four levels.
 					</script>
 				</section>
@@ -347,7 +495,7 @@ Shorter functions are easier to understand.
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 7:<br/>
+<p class="precept">Precept 7:</p>
 Consider all possible inputs and outputs.
 					</script>
 				</section>
@@ -369,7 +517,7 @@ Not sure if you control the data? Test the inputs anyway. Then you don't have to
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 8:<br/>
+<p class="precept">Precept 8:</p>
 Whenever possible, write tests first.
 					</script>
 				</section>
@@ -391,7 +539,7 @@ It can be refactored safely.
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 9:<br/>
+<p class="precept">Precept 9:</p>
 Don't test the code from other libraries,<br/> but test the inputs and outputs.
 					</script>
 				</section>
@@ -441,7 +589,7 @@ $this->assertTrue(
 
 				<section data-markdown>
 					<script type="text/template">
-Precept 10:<br/>
+<p class="precept">Precept 10:</p>
 Write only one assertion per test.
 					</script>
 				</section>
