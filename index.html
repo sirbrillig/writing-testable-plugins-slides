@@ -34,6 +34,9 @@
 	width: auto;
 	font-size: 0.9em;
 }
+.reveal code:not(.lang-php) {
+	color: #00ff5e;
+}
 .reveal .precept {
 	color: #61ff61;
 }
@@ -422,13 +425,38 @@ These can be tested without mocks.
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 3:</p>
-Use instance variables as constants. Avoid using static variables or `define`.
+Use instance variables as constants.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Instance variables are just as hidden during normal use, but can be changed during runtime to produce different effects.
+Instance variables can be changed during runtime to produce different for testing.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+define( 'DATA_DIR', '/data/dir' );
+
+class MyPlugin {
+	public function get_data() {
+		return file_get_contents( DATA_DIR . 'data.txt' );
+	}
+}
+```
+<p class="yay">Yay!</p>
+```php
+class MyPlugin {
+	public $data_dir = '/data/dir';
+
+	public function get_data() {
+		return file_get_contents( $this->data_dir. 'data.txt' );
+	}
+}
+```
 					</script>
 				</section>
 
@@ -441,7 +469,36 @@ Use filters to pass data indirectly.
 
 				<section data-markdown>
 					<script type="text/template">
-When passing data between classes, pass it explicitly as function input, but to pass it indirectly, use a filter.<br/> Filters can be mocked.
+Better to pass data directly, but...
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+When passing data between functions indirectly, use a filter.<br/> Filters can be mocked.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+```php
+function read_data( $post ) {
+	add_filter( 'my_data', function() use ( &$post ) {
+		return $post->post_content;
+	} );
+}
+
+function return_data() {
+	return apply_filters( 'my_data', $post->post_content );
+}
+```
+You can write tests to be sure the filter is added and applied.
+```php
+add_filter( 'my_data', function() {
+	return 'foobar';
+} );
+$this->assertEquals( 'foobar', return_data() );
+```
 					</script>
 				</section>
 
@@ -465,6 +522,18 @@ A function name should tell you what inputs and outputs are expected.
 <p class="fragment">
 Some great verbs are<br/> `get`, `is`, `update`, `create`, `remove`.
 </p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Example: a shortcode handler
+
+`my_shortcode` doesn't really say what it does.
+
+`process_my_shortcode` is better, but still ambiguous about what the function returns.
+
+`get_markup_from_shortcode` tells us what the input and output will be.
 					</script>
 				</section>
 
@@ -495,6 +564,38 @@ Shorter functions are easier to understand.
 
 				<section data-markdown>
 					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+function get_recent_post_titles( $posts ) {
+	$matching = [];
+	foreach( $posts as $post ) {
+		if ( time() - strtotime( $post->post_date_gmt ) < 86400 ) {
+			$matching[] = $post->post_title;
+		}
+	}
+	return $matching;
+}
+```
+<p class="yay">Yay!</p>
+```php
+function get_recent_post_titles( $posts ) {
+	$posts = array_filter( $posts, 'is_post_recent' );
+	return array_map( 'get_post_title', $posts );
+}
+
+function is_post_recent( $post ) {
+	return ( time() - strtotime( $post->post_date_gmt ) < 86400 );
+}
+
+function get_post_title( $post ) {
+	return $post->post_title;
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 <p class="precept">Precept 7:</p>
 Consider all possible inputs and outputs.
 					</script>
@@ -508,10 +609,29 @@ Check for errors from external functions.
 
 				<section data-markdown>
 					<script type="text/template">
-Functions can assume the existence and type of the data, but only if you control the data.
-<p class="fragment">
-Not sure if you control the data? Test the inputs anyway. Then you don't have to think about it.
-</p>
+When testing (or in real life!), your data might be missing or incomplete.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">Nope.</p>
+```php
+function get_post_title( $post_id ) {
+	$post = get_post( $post_id );
+	return $post->post_title;
+}
+```
+<p class="yay">Yay!</p>
+```php
+function get_post_title( $post_id ) {
+	$post = get_post( $post_id );
+	if ( $post ) {
+		return $post->post_title;
+	}
+	return '';
+}
+```
 					</script>
 				</section>
 
@@ -627,10 +747,26 @@ When you find a bug, write a test that causes it, and then fix the bug so the te
 
 				<section data-markdown>
 					<script type="text/template">
-Big thanks to the WordPress.com REST API test suite, and all its overworked, under-appreciated maintainers.
+### What is a unit test? (pt. 3)
+
 <p class="fragment">
+Confidence, safety, readability.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Big thanks to the WordPress.com REST API test suite, and all its overworked, under-appreciated maintainers.
+<p class="yay fragment">
 And big thanks to *you* for coming!
 </p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Good testing.
 					</script>
 				</section>
 
