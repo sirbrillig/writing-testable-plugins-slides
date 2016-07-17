@@ -506,11 +506,13 @@ Some great verbs are
 
 Example: a shortcode handler
 
-`my_shortcode` doesn't really say what it does.
+`add_shortcode( 'otherpages', ... );`
 
-`process_my_shortcode` is better, but still ambiguous about what the function returns.
+👆
 
-`get_markup_from_shortcode` tells us what the input and output will be.
+- `my_shortcode` doesn't really say what it does.
+- `process_my_shortcode` is better, but still ambiguous about what the function returns.
+- `get_markup_from_shortcode` tells us what the input and output will be.
 
 ---
 

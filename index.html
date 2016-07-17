@@ -43,6 +43,9 @@
 .reveal strong {
 	color: #61ff61;
 }
+.reveal .list {
+	text-align: left;
+}
 		</style>
 	</head>
 	<body>
@@ -152,10 +155,10 @@ this code's *input* is not just in its arguments.
 					<script type="text/template">
 To reduce dependencies:
 
-<p class="fragment">
+<p class="fragment list">
 1. Put dependencies in variables that can be overridden.
 </p>
-<p class="fragment">
+<p class="fragment list">
 2. Pass input to your functions rather than having your function fetch input.
 </p>
 					</script>
@@ -234,10 +237,10 @@ this code's *output* is not just in its return value.
 				<section data-markdown>
 					<script type="text/template">
 To reduce side effects:
-<p class="fragment">
+<p class="fragment list">
 1. Have each function do just one thing.
 </p>
-<p class="fragment">
+<p class="fragment list">
 2. Make more (specific) classes and functions.
 </p>
 					</script>
@@ -323,7 +326,7 @@ Where two classes interact, we can place a *mock*.
 
 				<section data-markdown>
 					<script type="text/template">
-Mocks (aka Stubs):
+**Mocks (aka Stubs):**
 
 fake objects or functions that behave in a way we can control.
 					</script>
@@ -331,8 +334,7 @@ fake objects or functions that behave in a way we can control.
 
 				<section data-markdown>
 					<script type="text/template">
-A simple mock object is just a `new StdClass()`,
-
+A simple mock object is just a `new StdClass()`,  
 and a simple mock function is just a `function`,
 
 but I'll suggest a library called `Spies`.
@@ -555,11 +557,13 @@ Some great verbs are
 					<script type="text/template">
 Example: a shortcode handler
 
-`my_shortcode` doesn't really say what it does.
+`add_shortcode( 'otherpages', ... );`
 
-`process_my_shortcode` is better, but still ambiguous about what the function returns.
+👆
 
-`get_markup_from_shortcode` tells us what the input and output will be.
+- `my_shortcode` doesn't really say what it does.
+- `process_my_shortcode` is better, but still ambiguous about what the function returns.
+- `get_markup_from_shortcode` tells us what the input and output will be.
 					</script>
 				</section>
 
@@ -572,8 +576,7 @@ If a function does too many things to name, consider splitting it.
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 6:</p>
-Keep functions below ten lines
-
+Keep functions below ten lines  
 and indentation below four levels.
 					</script>
 				</section>
@@ -808,11 +811,14 @@ These slides:
 
 http://bit.ly/writing-testable-wp-plugins
 
+👀
+
 A simple shortcode plugin with tests:
 
 https://github.com/sirbrillig/otherpages
 
-<hr/>
+🎉
+
 Good testing.
 					</script>
 				</section>
