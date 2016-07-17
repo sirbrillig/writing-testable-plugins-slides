@@ -1,11 +1,11 @@
-				
-					
+
+
 # Writing Testable Plugins
-					
+
 ---
 
-				
-					
+
+
 ## Who am I?
 
 Payton Swick
@@ -14,82 +14,91 @@ Code Wrangler at Automattic
 (we make WordPress.com)
 
 @sirbrillig
-					
+
 ---
 
-				
-					
+
+
 ### What is a unit test?
 
 
 Code to test that one piece of a system operates as expected.
 
-					
+
 ---
 
-				
-					
+
+
 There are units of different sizes.
-					
+
 ---
 
-				
-					
-Database tests are a big unit. Function tests are a small unit. Focus on the small.
-					
+
+
+Database tests are a big unit. Function tests are a small unit.
+
+Focus on the small.
+
 ---
 
-				
-					
+
+
 Smaller systems are easier to understand.
-					
+
 ---
 
-				
-					
-It's nice to be able to test a plugin *without* WordPress.
-					
+
+
+It's nice to be able to test a plugin
+
+*without* WordPress.
+
 ---
 
-				
-					
-You might not need unit tests!</p>
-(But it can't hurt!)</p>
-					
+
+
+You might not need unit tests!
+
+(But it can't hurt!)
+
 ---
 
-				
-					
+
+
 ### What is a unit test? (pt. 2)
 
 
 Unit tests check the *output* for a given *input*.
 
-					
+
 ---
 
-				
-					
+
+
 ### What is testable code?
 
 Code that makes it easy to test input and output in isolation.
-					
+
 ---
 
-				
-					
-Isolation is the hard part. Most code has dependencies and side effects.
-					
+
+
+Isolation is the hard part.
+
+Most code has dependencies and side effects.
+
 ---
 
-				
-					
-Dependencies: this code's *input* is not just in its arguments.
-					
+
+
+**Dependencies**:
+
+this code's *input* is not just in its arguments.
+
 ---
 
-				
-					
+
+
 To reduce dependencies:
 
 
@@ -98,12 +107,12 @@ To reduce dependencies:
 
 2. Pass input to your functions rather than having your function fetch input.
 
-					
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 function update_post_status( $post_id ) {
 	$post = get_post( $post_id );
@@ -113,7 +122,7 @@ function update_post_status( $post_id ) {
 
 update_post_status( 123 );
 ```
-Yay!</p>
+Yay!
 ```php
 function update_post_status( $post ) {
 	$post->post_status = 'publish';
@@ -122,12 +131,12 @@ function update_post_status( $post ) {
 
 update_post_status( get_post( 123 ) );
 ```
-					
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 class MyPlugin {
 	function update_post_status( $post_id ) {
@@ -136,7 +145,7 @@ class MyPlugin {
 	}
 }
 ```
-Yay!</p>
+Yay!
 ```php
 class MyPlugin {
 	public $updater;
@@ -150,26 +159,28 @@ class MyPlugin {
 	}
 }
 ```
-					
+
 ---
 
-				
-					
+
+
 Allowing dependencies to be overwritten is called "Dependency Injection".
 
 Tests can isolate one part of code from another by replacing the dependencies.
 
-					
+
 ---
 
-				
-					
-Side Effects: this code's *output* is not just in its return value.
-					
+
+
+**Side Effects**:
+
+this code's *output* is not just in its return value.
+
 ---
 
-				
-					
+
+
 To reduce side effects:
 
 1. Have each function do just one thing.
@@ -177,12 +188,12 @@ To reduce side effects:
 
 2. Make more (specific) classes and functions.
 
-					
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 function update_post_data( $post ) {
 	$post->post_status = 'publish';
@@ -192,7 +203,7 @@ function update_post_data( $post ) {
 
 update_post_data( $post );
 ```
-Yay!</p>
+Yay!
 ```php
 function update_post_status( $post ) {
 	$post->post_status = 'publish';
@@ -208,32 +219,33 @@ $post = update_post_status( get_post( 123 ) );
 $post = update_post_excerpt( $post );
 wp_update_post( $post );
 ```
-					
+
 ---
 
-				
-					
-### Payton's Testable</span> Precepts
-					
+
+
+### Payton's Testable Precepts
+
 ---
 
-				
-					
-Precept 1:</p>
+
+
+**Precept 1**:
+
 Always use classes, never global functions.
-					
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 function otherpages_add_shortcode() {
 ...
 }
 ```
 
-Yay!</p>
+Yay!
 ```php
 class Otherpages {
 	public function add_shortcode() {
@@ -241,30 +253,33 @@ class Otherpages {
 	}
 }
 ```
-					
+
 ---
 
-				
-					
-One class to do one thing. Don't be afraid of too many classes.
-					
+
+
+One class to do one thing.
+
+Don't be afraid of too many classes.
+
 ---
 
-				
-					
+
+
 Where two classes interact, we can place a *mock*.
-					
+
 ---
 
-				
-					
-Mocks (aka Stubs):
+
+
+**Mocks (aka Stubs)**:
+
 fake objects or functions that behave in a way we can control.
-					
+
 ---
 
-				
-					
+
+
 A simple mock object is just a `new StdClass()`,
 and a simple mock function is just a `function`,
 but I'll suggest a library called `Spies`.
@@ -272,11 +287,11 @@ but I'll suggest a library called `Spies`.
 https://github.com/sirbrillig/spies
 
 (I wrote it.)
-					
+
 ---
 
-				
-					
+
+
 Code getting input from a function dependency:
 ```php
 function get_the_content( id ) {
@@ -292,11 +307,11 @@ Test with a mock function dependency:
 $result = get_the_content( 123 );
 $this->assertEquals( 'hello', $result );
 ```
-					
+
 ---
 
-				
-					
+
+
 Code getting input from an object dependency:
 ```php
 class MyPlugin {
@@ -322,24 +337,27 @@ $plugin = new MyPlugin( $getter );
 $result = $plugin->get_data_content();
 $this->assertEquals( 'hello', $result );
 ```
-					
+
 ---
 
-				
-					
-Precept 2:</p>
+
+
+**Precept 2**:
+
 Don't use static functions except as generators.
-					
+
 ---
 
-				
-					
-Why are static methods risky? They cannot easily be mocked.
-					
+
+
+Why are static methods risky?
+
+They cannot easily be mocked.
+
 ---
 
-				
-					
+
+
 Generators are ok.
 
 ```php
@@ -356,11 +374,11 @@ class MyPlugin {
 }
 ```
 Generators don't always need to be tested.
-					
+
 ---
 
-				
-					
+
+
 Static functions that have no dependencies and no side-effects are ok.
 
 ```php
@@ -371,25 +389,26 @@ class MyPlugin {
 }
 ```
 These can be tested without mocks.
-					
+
 ---
 
-				
-					
-Precept 3:</p>
+
+
+**Precept 3**:
+
 Use instance variables as constants.
-					
+
 ---
 
-				
-					
+
+
 Instance variables can be changed during runtime to produce different for testing.
-					
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 define( 'DATA_DIR', '/data/dir' );
 
@@ -399,7 +418,7 @@ class MyPlugin {
 	}
 }
 ```
-Yay!</p>
+Yay!
 ```php
 class MyPlugin {
 	public $data_dir = '/data/dir';
@@ -409,30 +428,33 @@ class MyPlugin {
 	}
 }
 ```
-					
+
 ---
 
-				
-					
-Precept 4:</p>
+
+
+**Precept 4**:
+
 Use filters to pass data indirectly.
-					
+
 ---
 
-				
-					
+
+
 Better to pass data directly, but...
-					
+
 ---
 
-				
-					
-When passing data between functions indirectly, use a filter. Filters can be mocked.
-					
+
+
+When passing data between functions indirectly, use a filter.
+
+Filters can be mocked.
+
 ---
 
-				
-					
+
+
 ```php
 function read_data( $post ) {
 	add_filter( 'my_data', function() use ( &$post ) {
@@ -451,34 +473,37 @@ add_filter( 'my_data', function() {
 } );
 $this->assertEquals( 'foobar', return_data() );
 ```
-					
+
 ---
 
-				
-					
-Precept 5:</p>
+
+
+**Precept 5**:
+
 Use verbs in all function names.
-					
+
 ---
 
-				
-					
+
+
 Isn't that just style?
-					
+
 ---
 
-				
-					
+
+
 A function name should tell you what inputs and outputs are expected.
 
 
-Some great verbs are `get`, `is`, `update`, `create`, `remove`.
+Some great verbs are
 
-					
+`get`, `is`, `update`, `create`, `remove`.
+
+
 ---
 
-				
-					
+
+
 Example: a shortcode handler
 
 `my_shortcode` doesn't really say what it does.
@@ -486,37 +511,42 @@ Example: a shortcode handler
 `process_my_shortcode` is better, but still ambiguous about what the function returns.
 
 `get_markup_from_shortcode` tells us what the input and output will be.
-					
+
 ---
 
-				
-					
+
+
 If a function does too many things to name, consider splitting it.
-					
+
 ---
 
-				
-					
-Precept 6:</p>
-Keep functions below ten lines and indentation below four levels.
-					
+
+
+**Precept 6**:
+
+Keep functions below ten lines
+
+and indentation below four levels.
+
 ---
 
-				
-					
+
+
 Shorter functions are easier to understand.
-					
+
 ---
 
-				
-					
-Use `array_map`, `array_filter`, `array_reduce`, etc.</p><p> instead of `while`, `for`, and `foreach`.</p>
-					
+
+
+Use `array_map`, `array_filter`, `array_reduce`, etc.
+
+instead of `while`, `for`, and `foreach`.
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 function get_recent_post_titles( $posts ) {
 	$matching = [];
@@ -527,7 +557,7 @@ function get_recent_post_titles( $posts ) {
 	return $matching;
 }
 ```
-Yay!</p>
+Yay!
 ```php
 function get_recent_post_titles( $posts ) {
 	$posts = array_filter( $posts, 'is_post_recent' );
@@ -538,38 +568,39 @@ function is_post_recent( $post ) {
 	return ( time() - strtotime( $post->post_date_gmt ) post_title;
 }
 ```
-					
+
 ---
 
-				
-					
-Precept 7:</p>
+
+
+**Precept 7**:
+
 Consider all possible inputs and outputs.
-					
+
 ---
 
-				
-					
+
+
 Check for errors from external functions.
-					
+
 ---
 
-				
-					
+
+
 When testing (or in real life!), your data might be missing or incomplete.
-					
+
 ---
 
-				
-					
-Nope.</p>
+
+
+Nope.
 ```php
 function get_post_title( $post_id ) {
 	$post = get_post( $post_id );
 	return $post->post_title;
 }
 ```
-Yay!</p>
+Yay!
 ```php
 function get_post_title( $post_id ) {
 	$post = get_post( $post_id );
@@ -579,18 +610,19 @@ function get_post_title( $post_id ) {
 	return '';
 }
 ```
-					
+
 ---
 
-				
-					
-Precept 8:</p>
+
+
+**Precept 8**:
+
 Whenever possible, write tests first.
-					
+
 ---
 
-				
-					
+
+
 Tested code gives us confidence.
 
 It will work the way we expect.
@@ -601,41 +633,46 @@ It will work the way we expect.
 
 It can be refactored safely.
 
-					
+
 ---
 
-				
-					
-Precept 9:</p>
-Don't test the code from other libraries, but test the inputs and outputs.
-					
+
+
+**Precept 9**:
+
+Don't test the code from other libraries,
+
+but test the inputs and outputs.
+
 ---
 
-				
-					
-We can assume that WordPress works. (Otherwise we have bigger problems!)
+
+
+We can assume that WordPress works.
+
+(Otherwise we have bigger problems!)
 
 
 But we should make sure that we are using WordPress the way we expect.
 
-					
+
 ---
 
-				
-					
+
+
 We can test the inputs to external functions with *spies*.
-					
+
 ---
 
-				
-					
+
+
 ### What is a Spy?
 An object that behaves like a function and which we can query to learn how it was called.
-					
+
 ---
 
-				
-					
+
+
 ```php
 $spy = \Spies\get_spy_for( 'add_shortcode' );
 
@@ -651,49 +688,54 @@ $this->assertTrue(
 	);
 );
 ```
-					
+
 ---
 
-				
-					
-Precept 10:</p>
+
+
+**Precept 10**:
+
 Write only one assertion per test.
-					
+
 ---
 
-				
-					
-A unit is one thing. A unit test should test that one thing.<br/> One function's *one input* and *one output*.
-					
+
+
+A unit is one thing. A unit test should test that one thing.
+
+One function's *one input* and *one output*.
+
 ---
 
-				
-					
-Can a function have more than one input or output? Write more than one test.
-					
+
+
+Can a function have more than one input or output?
+
+Write more than one test.
+
 ---
 
-				
-					
+
+
 > "Unit tests isolate failures. Even if a product contains millions of lines of code, if a unit test fails, you only need to search that small unit under test to find the bug."
 
 
 https://googletesting.blogspot.co.uk/2015/04/just-say-no-to-more-end-to-end-tests.html
 
-					
+
 ---
 
-				
-					
+
+
 Code is hard. You can't predict all possible situations.
 
 When you find a bug, write a test that causes it, and then fix the bug so the test passes.
 
-					
+
 ---
 
-				
-					
+
+
 ### What is a unit test? (pt. 3)
 
 

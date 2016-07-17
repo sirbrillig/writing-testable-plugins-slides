@@ -40,6 +40,9 @@
 .reveal .precept {
 	color: #61ff61;
 }
+.reveal strong {
+	color: #61ff61;
+}
 		</style>
 	</head>
 	<body>
@@ -58,10 +61,11 @@
 
 Payton Swick
 
-Code Wrangler at Automattic<br/>
+Code Wrangler at Automattic
+
 (we make WordPress.com)
 
-@sirbrillig
+[@sirbrillig](https://twitter.com/sirbrillig)
 					</script>
 				</section>
 
@@ -83,7 +87,9 @@ There are units of different sizes.
 
 				<section data-markdown>
 					<script type="text/template">
-Database tests are a big unit. Function tests are a small unit.<br/> Focus on the small.
+Database tests are a big unit. Function tests are a small unit.
+
+Focus on the small.
 					</script>
 				</section>
 
@@ -95,7 +101,9 @@ Smaller systems are easier to understand.
 
 				<section data-markdown>
 					<script type="text/template">
-It's nice to be able to test a plugin<br/> *without* WordPress.
+It's nice to be able to test a plugin
+
+*without* WordPress.
 					</script>
 				</section>
 
@@ -126,13 +134,17 @@ Code that makes it easy to test input and output in isolation.
 
 				<section data-markdown>
 					<script type="text/template">
-Isolation is the hard part.<br/> Most code has dependencies and side effects.
+Isolation is the hard part.
+
+Most code has dependencies and side effects.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Dependencies:<br/> this code's *input* is not just in its arguments.
+**Dependencies:**
+
+this code's *input* is not just in its arguments.
 					</script>
 				</section>
 
@@ -203,7 +215,8 @@ class MyPlugin {
 
 				<section data-markdown>
 					<script type="text/template">
-Allowing dependencies to be overwritten is called "Dependency Injection".<br/>
+Allowing dependencies to be overwritten is called "Dependency Injection".
+
 <p class="fragment">
 Tests can isolate one part of code from another by replacing the dependencies.
 </p>
@@ -212,7 +225,9 @@ Tests can isolate one part of code from another by replacing the dependencies.
 
 				<section data-markdown>
 					<script type="text/template">
-Side Effects:<br/> this code's *output* is not just in its return value.
+**Side Effects:**
+
+this code's *output* is not just in its return value.
 					</script>
 				</section>
 
@@ -294,7 +309,9 @@ class Otherpages {
 
 				<section data-markdown>
 					<script type="text/template">
-One class to do one thing.<br/> Don't be afraid of too many classes.
+One class to do one thing.
+
+Don't be afraid of too many classes.
 					</script>
 				</section>
 
@@ -306,15 +323,18 @@ Where two classes interact, we can place a *mock*.
 
 				<section data-markdown>
 					<script type="text/template">
-Mocks (aka Stubs):<br/>
+Mocks (aka Stubs):
+
 fake objects or functions that behave in a way we can control.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-A simple mock object is just a `new StdClass()`,<br/>
-and a simple mock function is just a `function`,<br/>
+A simple mock object is just a `new StdClass()`,
+
+and a simple mock function is just a `function`,
+
 but I'll suggest a library called `Spies`.
 
 https://github.com/sirbrillig/spies
@@ -382,7 +402,9 @@ Don't use static functions except as generators.
 
 				<section data-markdown>
 					<script type="text/template">
-Why are static methods risky?<br/> They cannot easily be mocked.
+Why are static methods risky?
+
+They cannot easily be mocked.
 					</script>
 				</section>
 
@@ -475,7 +497,9 @@ Better to pass data directly, but...
 
 				<section data-markdown>
 					<script type="text/template">
-When passing data between functions indirectly, use a filter.<br/> Filters can be mocked.
+When passing data between functions indirectly, use a filter.
+
+Filters can be mocked.
 					</script>
 				</section>
 
@@ -520,7 +544,9 @@ Isn't that just style?
 A function name should tell you what inputs and outputs are expected.
 
 <p class="fragment">
-Some great verbs are<br/> `get`, `is`, `update`, `create`, `remove`.
+Some great verbs are
+
+`get`, `is`, `update`, `create`, `remove`.
 </p>
 					</script>
 				</section>
@@ -546,7 +572,9 @@ If a function does too many things to name, consider splitting it.
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 6:</p>
-Keep functions below ten lines<br/> and indentation below four levels.
+Keep functions below ten lines
+
+and indentation below four levels.
 					</script>
 				</section>
 
@@ -660,13 +688,17 @@ It can be refactored safely.
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 9:</p>
-Don't test the code from other libraries,<br/> but test the inputs and outputs.
+Don't test the code from other libraries,
+
+but test the inputs and outputs.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-We can assume that WordPress works.<br/> (Otherwise we have bigger problems!)
+We can assume that WordPress works.
+
+(Otherwise we have bigger problems!)
 
 <p class="fragment">
 But we should make sure that we are using WordPress the way we expect.
@@ -716,13 +748,19 @@ Write only one assertion per test.
 
 				<section data-markdown>
 					<script type="text/template">
-A unit is one thing.<br/> A unit test should test that one thing.<br/> One function's *one input* and *one output*.
+A unit is one thing.
+
+A unit test should test that one thing.
+
+One function's *one input* and *one output*.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Can a function have more than one input or output?<br/> Write more than one test.
+Can a function have more than one input or output?
+
+Write more than one test.
 					</script>
 				</section>
 
