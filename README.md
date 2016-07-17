@@ -551,7 +551,8 @@ Nope.
 function get_recent_post_titles( $posts ) {
 	$matching = [];
 	foreach( $posts as $post ) {
-		if ( time() - strtotime( $post->post_date_gmt ) post_title;
+		if ( time() - strtotime( $post->post_date_gmt ) < 86400 ) {
+			$matching[] = $post->post_title;
 		}
 	}
 	return $matching;
@@ -565,7 +566,11 @@ function get_recent_post_titles( $posts ) {
 }
 
 function is_post_recent( $post ) {
-	return ( time() - strtotime( $post->post_date_gmt ) post_title;
+	return ( time() - strtotime( $post->post_date_gmt ) < 86400 );
+}
+
+function get_post_title( $post ) {
+	return $post->post_title;
 }
 ```
 
