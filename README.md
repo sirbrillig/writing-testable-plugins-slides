@@ -112,7 +112,7 @@ To reduce dependencies:
 
 
 
-Nope.
+🚫 Nope.
 ```php
 function update_post_status( $post_id ) {
 	$post = get_post( $post_id );
@@ -122,7 +122,7 @@ function update_post_status( $post_id ) {
 
 update_post_status( 123 );
 ```
-Yay!
+🎉 Yay!
 ```php
 function update_post_status( $post ) {
 	$post->post_status = 'publish';
@@ -136,7 +136,7 @@ update_post_status( get_post( 123 ) );
 
 
 
-Nope.
+🚫 Nope.
 ```php
 class MyPlugin {
 	function update_post_status( $post_id ) {
@@ -145,7 +145,7 @@ class MyPlugin {
 	}
 }
 ```
-Yay!
+🎉 Yay!
 ```php
 class MyPlugin {
 	public $updater;
@@ -193,7 +193,7 @@ To reduce side effects:
 
 
 
-Nope.
+🚫 Nope.
 ```php
 function update_post_data( $post ) {
 	$post->post_status = 'publish';
@@ -203,7 +203,7 @@ function update_post_data( $post ) {
 
 update_post_data( $post );
 ```
-Yay!
+🎉 Yay!
 ```php
 function update_post_status( $post ) {
 	$post->post_status = 'publish';
@@ -238,14 +238,14 @@ Always use classes, never global functions.
 
 
 
-Nope.
+🚫 Nope.
 ```php
 function otherpages_add_shortcode() {
 ...
 }
 ```
 
-Yay!
+🎉 Yay!
 ```php
 class Otherpages {
 	public function add_shortcode() {
@@ -408,7 +408,7 @@ Instance variables can be changed during runtime to produce different for testin
 
 
 
-Nope.
+🚫 Nope.
 ```php
 define( 'DATA_DIR', '/data/dir' );
 
@@ -418,7 +418,7 @@ class MyPlugin {
 	}
 }
 ```
-Yay!
+🎉 Yay!
 ```php
 class MyPlugin {
 	public $data_dir = '/data/dir';
@@ -546,7 +546,7 @@ instead of `while`, `for`, and `foreach`.
 
 
 
-Nope.
+🚫 Nope.
 ```php
 function get_recent_post_titles( $posts ) {
 	$matching = [];
@@ -558,7 +558,7 @@ function get_recent_post_titles( $posts ) {
 	return $matching;
 }
 ```
-Yay!
+🎉 Yay!
 ```php
 function get_recent_post_titles( $posts ) {
 	$posts = array_filter( $posts, 'is_post_recent' );
@@ -598,14 +598,14 @@ When testing (or in real life!), your data might be missing or incomplete.
 
 
 
-Nope.
+🚫 Nope.
 ```php
 function get_post_title( $post_id ) {
 	$post = get_post( $post_id );
 	return $post->post_title;
 }
 ```
-Yay!
+🎉 Yay!
 ```php
 function get_post_title( $post_id ) {
 	$post = get_post( $post_id );
