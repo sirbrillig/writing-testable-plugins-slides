@@ -64,8 +64,7 @@
 
 Payton Swick
 
-Code Wrangler at Automattic
-
+Code Wrangler at Automattic  
 (we make WordPress.com)
 
 [@sirbrillig](https://twitter.com/sirbrillig)
@@ -74,16 +73,35 @@ Code Wrangler at Automattic
 
 				<section data-markdown>
 					<script type="text/template">
-### What is a unit test?
+### Writing testable plugins? Why?
 
 <p class="fragment">
-Code to test that one piece of a system operates as expected.
+These days the systems we are building are more and more complex. We press one button and get a result, but a million things happen behind the scenes.
+</p>
+
+<p class="fragment">
+If something goes wrong, you don't want to get one of those "Sorry, an error occurred!" messages.
+</p>
+
+<p class="fragment">
+You want to know exactly what happened. Good unit tests will give you that.
 </p>
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
+### What is a unit test?
+
+<p class="fragment">
+Some code to test that one piece of a system operates as expected.
+</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### Unit?
 There are units of different sizes.
 					</script>
 				</section>
@@ -104,8 +122,9 @@ Smaller systems are easier to understand.
 
 				<section data-markdown>
 					<script type="text/template">
-It's nice to be able to test a plugin
+Also, WordPress is a big unit!
 
+It's nice to be able to test a plugin  
 *without* WordPress.
 					</script>
 				</section>
@@ -122,7 +141,8 @@ It's nice to be able to test a plugin
 ### What is a unit test? (pt. 2)
 
 <p class="fragment">
-Unit tests check the *output* for a given *input*.
+Unit tests check the *output* for a given *input*.<br/>
+👉 🙌
 </p>
 					</script>
 				</section>
@@ -131,7 +151,8 @@ Unit tests check the *output* for a given *input*.
 					<script type="text/template">
 ### What is testable code?
 
-Code that makes it easy to test input and output in isolation.
+Code that makes it easy to test  
+inputs and outputs in isolation.
 					</script>
 				</section>
 
@@ -139,7 +160,7 @@ Code that makes it easy to test input and output in isolation.
 					<script type="text/template">
 Isolation is the hard part.
 
-Most code has dependencies and side effects.
+Most code has *dependencies* and *side effects*.
 					</script>
 				</section>
 
@@ -147,7 +168,7 @@ Most code has dependencies and side effects.
 					<script type="text/template">
 **Dependencies:**
 
-this code's *input* is not just in its arguments.
+this code's *input* is not just in the arguments.
 					</script>
 				</section>
 
@@ -156,10 +177,10 @@ this code's *input* is not just in its arguments.
 To reduce dependencies:
 
 <p class="fragment list">
-1. Put dependencies in variables that can be overridden.
+1. Pass input to your functions rather than having your function fetch input themselves.
 </p>
 <p class="fragment list">
-2. Pass input to your functions rather than having your function fetch input.
+2. Put dependencies in variables that can be overridden.
 </p>
 					</script>
 				</section>
@@ -256,7 +277,7 @@ function update_post_data( $post ) {
 	return wp_update_post( $post );
 }
 
-update_post_data( $post );
+update_post_data( get_post( 123 ) );
 ```
 <p class="yay">🎉 Yay!</p>
 ```php
@@ -326,7 +347,7 @@ Where two classes interact, we can place a *mock*.
 
 				<section data-markdown>
 					<script type="text/template">
-**Mocks (aka Stubs):**
+### Mocks (aka Stubs):
 
 fake objects or functions that behave in a way we can control.
 					</script>
@@ -334,9 +355,7 @@ fake objects or functions that behave in a way we can control.
 
 				<section data-markdown>
 					<script type="text/template">
-A simple mock object is just a `new StdClass()`,  
-and a simple mock function is just a `function`,
-
+There are lots of ways to make mock objects and functions.  
 but I'll suggest a library called `Spies`.
 
 https://github.com/sirbrillig/spies
@@ -349,12 +368,12 @@ https://github.com/sirbrillig/spies
 					<script type="text/template">
 Code getting input from a function dependency:
 ```php
-function get_the_content( id ) {
-	$post = get_post( id );
+function get_the_content( $id ) {
+	$post = get_post( $id );
 	return $post->post_content;
 }
 ```
-Test with a mock function dependency:
+A test of that code with a mock function dependency:
 ```php
 \Spies\mock_function( 'get_post' )->that_returns(
 	(object) [ 'ID' => 123, 'post_content' => 'hello' ]
@@ -382,7 +401,7 @@ class MyPlugin {
 	}
 }
 ```
-Test with a mock object dependency:
+A test of that code with a mock object dependency:
 ```php
 $getter = \Spies\mock_object();
 $getter->add_method( 'get_post' )->that_returns(
@@ -407,12 +426,16 @@ Don't use static functions except as generators.
 Why are static methods risky?
 
 They cannot easily be mocked.
+
+😛
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Generators are ok.
+Generators are a shortcut for object creation.
+
+Static Generators are ok.
 
 ```php
 class MyPlugin {
@@ -427,13 +450,14 @@ class MyPlugin {
 	}
 }
 ```
-Generators don't always need to be tested.
+They don't always need to be tested because we can test the object creation manually.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Static functions that have no dependencies and no side-effects are ok.
+Static functions that have  
+no dependencies and no side-effects are ok.
 
 ```php
 class MyPlugin {
@@ -455,7 +479,7 @@ Use instance variables as constants.
 
 				<section data-markdown>
 					<script type="text/template">
-Instance variables can be changed during runtime to produce different for testing.
+Instance variables can be changed during runtime to produce different results for testing.
 					</script>
 				</section>
 
@@ -467,7 +491,7 @@ define( 'DATA_DIR', '/data/dir' );
 
 class MyPlugin {
 	public function get_data() {
-		return file_get_contents( DATA_DIR . 'data.txt' );
+		return file_get_contents( DATA_DIR . '/data.txt' );
 	}
 }
 ```
@@ -477,7 +501,7 @@ class MyPlugin {
 	public $data_dir = '/data/dir';
 
 	public function get_data() {
-		return file_get_contents( $this->data_dir. 'data.txt' );
+		return file_get_contents( $this->data_dir. '/data.txt' );
 	}
 }
 ```
@@ -494,6 +518,16 @@ Use filters to pass data indirectly.
 				<section data-markdown>
 					<script type="text/template">
 Better to pass data directly, but...
+
+🗣  👬 👬 👬 👬
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Sometimes you need to get data from one place and have something else pick it up later.
+
+🗣  👬 🕗  👬 👬
 					</script>
 				</section>
 
@@ -502,11 +536,14 @@ Better to pass data directly, but...
 When passing data between functions indirectly, use a filter.
 
 Filters can be mocked.
+
+<p class="fragment">(Thanks WordPress!)</p>
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
+Here's an example of using a filter.
 ```php
 function read_data( $post ) {
 	add_filter( 'my_data', function() use ( &$post ) {
@@ -520,9 +557,8 @@ function return_data() {
 ```
 You can write tests to be sure the filter is added and applied.
 ```php
-add_filter( 'my_data', function() {
-	return 'foobar';
-} );
+mock_function( 'apply_filters' )->
+	when_called->with( 'my_data' )->will_return( 'foobar' );
 $this->assertEquals( 'foobar', return_data() );
 ```
 					</script>
@@ -538,6 +574,8 @@ Use verbs in all function names.
 				<section data-markdown>
 					<script type="text/template">
 Isn't that just style?
+
+🤔
 					</script>
 				</section>
 
@@ -576,7 +614,7 @@ If a function does too many things to name, consider splitting it.
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 6:</p>
-Keep functions below ten lines  
+Keep functions below eight lines  
 and indentation below four levels.
 					</script>
 				</section>
@@ -724,13 +762,27 @@ An object that behaves like a function and which we can query to learn how it wa
 
 				<section data-markdown>
 					<script type="text/template">
+(do a thing that calls a method)
+
+"Hey spy! Did that method get called the way we expected?"
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Here we use a spy to make sure a shortcode is added correctly.
+```php
+function add_my_shortcode() {
+	add_shortcode(
+		'otherpages',
+		'get_markup_from_shortcode'
+	);
+}
+```
 ```php
 $spy = \Spies\get_spy_for( 'add_shortcode' );
 
-add_shortcode(
-	'otherpages',
-	'get_markup_from_shortcode'
-);
+add_my_shortcode();
 
 $this->assertTrue(
 	$spy->was_called_with(
@@ -793,11 +845,16 @@ When you find a bug, write a test that causes it, and then fix the bug so the te
 <p class="fragment">
 Confidence, safety, readability.
 </p>
+<p class="fragment">
+An investment in the future of your code.
+</p>
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
+🙇 🙇 🙇
+
 Big thanks to the WordPress.com REST API test suite, and all its overworked, under-appreciated maintainers.
 <p class="yay fragment">
 And big thanks to *you* for coming!
@@ -817,9 +874,13 @@ A simple shortcode plugin with tests:
 
 https://github.com/sirbrillig/otherpages
 
+Spies:
+
+https://github.com/sirbrillig/spies
+
 🎉
 
-Good testing.
+Good testing!
 					</script>
 				</section>
 
