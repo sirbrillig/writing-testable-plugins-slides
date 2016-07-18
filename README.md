@@ -10,10 +10,28 @@
 
 Payton Swick
 
-Code Wrangler at Automattic
+Code Wrangler at Automattic  
 (we make WordPress.com)
 
-@sirbrillig
+[@sirbrillig](https://twitter.com/sirbrillig)
+
+---
+
+
+
+### Writing testable plugins? Why?
+
+
+These days the systems we are building are more and more complex. We press one button and get a result, but a million things happen behind the scenes.
+
+
+
+If something goes wrong, you don't want to get one of those "Sorry, an error occurred!" messages.
+
+
+
+You want to know exactly what happened. Good unit tests will give you that.
+
 
 ---
 
@@ -22,13 +40,14 @@ Code Wrangler at Automattic
 ### What is a unit test?
 
 
-Code to test that one piece of a system operates as expected.
+Some code to test that one piece of a system operates as expected.
 
 
 ---
 
 
 
+### Unit?
 There are units of different sizes.
 
 ---
@@ -49,8 +68,9 @@ Smaller systems are easier to understand.
 
 
 
-It's nice to be able to test a plugin
+Also, WordPress is a big unit!
 
+It's nice to be able to test a plugin  
 *without* WordPress.
 
 ---
@@ -58,7 +78,6 @@ It's nice to be able to test a plugin
 
 
 You might not need unit tests!
-
 (But it can't hurt!)
 
 ---
@@ -69,6 +88,7 @@ You might not need unit tests!
 
 
 Unit tests check the *output* for a given *input*.
+👉 🙌
 
 
 ---
@@ -77,7 +97,8 @@ Unit tests check the *output* for a given *input*.
 
 ### What is testable code?
 
-Code that makes it easy to test input and output in isolation.
+Code that makes it easy to test  
+inputs and outputs in isolation.
 
 ---
 
@@ -85,15 +106,15 @@ Code that makes it easy to test input and output in isolation.
 
 Isolation is the hard part.
 
-Most code has dependencies and side effects.
+Most code has *dependencies* and *side effects*.
 
 ---
 
 
 
-**Dependencies**:
+**Dependencies:**
 
-this code's *input* is not just in its arguments.
+this code's *input* is not just in the arguments.
 
 ---
 
@@ -102,10 +123,10 @@ this code's *input* is not just in its arguments.
 To reduce dependencies:
 
 
-1. Put dependencies in variables that can be overridden.
+1. Pass input to your functions rather than having your function fetch input themselves.
 
 
-2. Pass input to your functions rather than having your function fetch input.
+2. Put dependencies in variables that can be overridden.
 
 
 ---
@@ -166,6 +187,7 @@ class MyPlugin {
 
 Allowing dependencies to be overwritten is called "Dependency Injection".
 
+
 Tests can isolate one part of code from another by replacing the dependencies.
 
 
@@ -173,7 +195,7 @@ Tests can isolate one part of code from another by replacing the dependencies.
 
 
 
-**Side Effects**:
+**Side Effects:**
 
 this code's *output* is not just in its return value.
 
@@ -201,7 +223,7 @@ function update_post_data( $post ) {
 	return wp_update_post( $post );
 }
 
-update_post_data( $post );
+update_post_data( get_post( 123 ) );
 ```
 🎉 Yay!
 ```php
@@ -230,8 +252,7 @@ wp_update_post( $post );
 
 
 
-**Precept 1**:
-
+**Precept 1:**
 Always use classes, never global functions.
 
 ---
@@ -272,7 +293,7 @@ Where two classes interact, we can place a *mock*.
 
 
 
-**Mocks (aka Stubs)**:
+### Mocks (aka Stubs):
 
 fake objects or functions that behave in a way we can control.
 
@@ -280,8 +301,7 @@ fake objects or functions that behave in a way we can control.
 
 
 
-A simple mock object is just a `new StdClass()`,
-and a simple mock function is just a `function`,
+There are lots of ways to make mock objects and functions.  
 but I'll suggest a library called `Spies`.
 
 https://github.com/sirbrillig/spies
@@ -294,12 +314,12 @@ https://github.com/sirbrillig/spies
 
 Code getting input from a function dependency:
 ```php
-function get_the_content( id ) {
-	$post = get_post( id );
+function get_the_content( $id ) {
+	$post = get_post( $id );
 	return $post->post_content;
 }
 ```
-Test with a mock function dependency:
+A test of that code with a mock function dependency:
 ```php
 \Spies\mock_function( 'get_post' )->that_returns(
 	(object) [ 'ID' => 123, 'post_content' => 'hello' ]
@@ -327,7 +347,7 @@ class MyPlugin {
 	}
 }
 ```
-Test with a mock object dependency:
+A test of that code with a mock object dependency:
 ```php
 $getter = \Spies\mock_object();
 $getter->add_method( 'get_post' )->that_returns(
@@ -342,8 +362,7 @@ $this->assertEquals( 'hello', $result );
 
 
 
-**Precept 2**:
-
+**Precept 2:**
 Don't use static functions except as generators.
 
 ---
@@ -354,11 +373,15 @@ Why are static methods risky?
 
 They cannot easily be mocked.
 
+😛
+
 ---
 
 
 
-Generators are ok.
+Generators are a shortcut for object creation.
+
+Static Generators are ok.
 
 ```php
 class MyPlugin {
@@ -373,13 +396,14 @@ class MyPlugin {
 	}
 }
 ```
-Generators don't always need to be tested.
+They don't always need to be tested because we can test the object creation manually.
 
 ---
 
 
 
-Static functions that have no dependencies and no side-effects are ok.
+Static functions that have  
+no dependencies and no side-effects are ok.
 
 ```php
 class MyPlugin {
@@ -394,15 +418,14 @@ These can be tested without mocks.
 
 
 
-**Precept 3**:
-
+**Precept 3:**
 Use instance variables as constants.
 
 ---
 
 
 
-Instance variables can be changed during runtime to produce different for testing.
+Instance variables can be changed during runtime to produce different results for testing.
 
 ---
 
@@ -414,7 +437,7 @@ define( 'DATA_DIR', '/data/dir' );
 
 class MyPlugin {
 	public function get_data() {
-		return file_get_contents( DATA_DIR . 'data.txt' );
+		return file_get_contents( DATA_DIR . '/data.txt' );
 	}
 }
 ```
@@ -424,7 +447,7 @@ class MyPlugin {
 	public $data_dir = '/data/dir';
 
 	public function get_data() {
-		return file_get_contents( $this->data_dir. 'data.txt' );
+		return file_get_contents( $this->data_dir. '/data.txt' );
 	}
 }
 ```
@@ -433,8 +456,7 @@ class MyPlugin {
 
 
 
-**Precept 4**:
-
+**Precept 4:**
 Use filters to pass data indirectly.
 
 ---
@@ -442,6 +464,16 @@ Use filters to pass data indirectly.
 
 
 Better to pass data directly, but...
+
+🗣  👬 👬 👬 👬
+
+---
+
+
+
+Sometimes you need to get data from one place and have something else pick it up later.
+
+🗣  👬 🕗  👬 👬
 
 ---
 
@@ -451,10 +483,13 @@ When passing data between functions indirectly, use a filter.
 
 Filters can be mocked.
 
+(Thanks WordPress!)
+
 ---
 
 
 
+Here's an example of using a filter.
 ```php
 function read_data( $post ) {
 	add_filter( 'my_data', function() use ( &$post ) {
@@ -468,9 +503,8 @@ function return_data() {
 ```
 You can write tests to be sure the filter is added and applied.
 ```php
-add_filter( 'my_data', function() {
-	return 'foobar';
-} );
+mock_function( 'apply_filters' )->
+	when_called->with( 'my_data' )->will_return( 'foobar' );
 $this->assertEquals( 'foobar', return_data() );
 ```
 
@@ -478,8 +512,7 @@ $this->assertEquals( 'foobar', return_data() );
 
 
 
-**Precept 5**:
-
+**Precept 5:**
 Use verbs in all function names.
 
 ---
@@ -487,6 +520,8 @@ Use verbs in all function names.
 
 
 Isn't that just style?
+
+🤔
 
 ---
 
@@ -524,10 +559,8 @@ If a function does too many things to name, consider splitting it.
 
 
 
-**Precept 6**:
-
-Keep functions below ten lines
-
+**Precept 6:**
+Keep functions below eight lines  
 and indentation below four levels.
 
 ---
@@ -540,9 +573,7 @@ Shorter functions are easier to understand.
 
 
 
-Use `array_map`, `array_filter`, `array_reduce`, etc.
-
-instead of `while`, `for`, and `foreach`.
+Use `array_map`, `array_filter`, `array_reduce`, etc. instead of `while`, `for`, and `foreach`.
 
 ---
 
@@ -553,7 +584,7 @@ instead of `while`, `for`, and `foreach`.
 function get_recent_post_titles( $posts ) {
 	$matching = [];
 	foreach( $posts as $post ) {
-		if ( time() - strtotime( $post->post_date_gmt ) < 86400 ) {
+		if ( time()- strtotime( $post->post_date_gmt ) < 86400 ) {
 			$matching[] = $post->post_title;
 		}
 	}
@@ -568,7 +599,7 @@ function get_recent_post_titles( $posts ) {
 }
 
 function is_post_recent( $post ) {
-	return ( time() - strtotime( $post->post_date_gmt ) < 86400 );
+	return ( time()- strtotime( $post->post_date_gmt ) < 86400 );
 }
 
 function get_post_title( $post ) {
@@ -580,8 +611,7 @@ function get_post_title( $post ) {
 
 
 
-**Precept 7**:
-
+**Precept 7:**
 Consider all possible inputs and outputs.
 
 ---
@@ -622,8 +652,7 @@ function get_post_title( $post_id ) {
 
 
 
-**Precept 8**:
-
+**Precept 8:**
 Whenever possible, write tests first.
 
 ---
@@ -645,8 +674,7 @@ It can be refactored safely.
 
 
 
-**Precept 9**:
-
+**Precept 9:**
 Don't test the code from other libraries,
 
 but test the inputs and outputs.
@@ -680,13 +708,27 @@ An object that behaves like a function and which we can query to learn how it wa
 
 
 
+(do a thing that calls a method)
+
+"Hey spy! Did that method get called the way we expected?"
+
+---
+
+
+
+Here we use a spy to make sure a shortcode is added correctly.
+```php
+function add_my_shortcode() {
+	add_shortcode(
+		'otherpages',
+		'get_markup_from_shortcode'
+	);
+}
+```
 ```php
 $spy = \Spies\get_spy_for( 'add_shortcode' );
 
-add_shortcode(
-	'otherpages',
-	'get_markup_from_shortcode'
-);
+add_my_shortcode();
 
 $this->assertTrue(
 	$spy->was_called_with(
@@ -700,15 +742,16 @@ $this->assertTrue(
 
 
 
-**Precept 10**:
-
+**Precept 10:**
 Write only one assertion per test.
 
 ---
 
 
 
-A unit is one thing. A unit test should test that one thing.
+A unit is one thing.
+
+A unit test should test that one thing.
 
 One function's *one input* and *one output*.
 
@@ -747,4 +790,8 @@ When you find a bug, write a test that causes it, and then fix the bug so the te
 
 
 Confidence, safety, readability.
+
+
+An investment in the future of your code.
+
 
