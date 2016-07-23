@@ -518,7 +518,7 @@ class MyPlugin {
 	public $data_dir = '/data/dir';
 
 	public function get_data() {
-		return file_get_contents( $this->data_dir. '/data.txt' );
+		return file_get_contents( $this->data_dir . '/data.txt' );
 	}
 }
 ```
@@ -562,21 +562,23 @@ Filters can be mocked.
 					<script type="text/template">
 Here's an example of using a filter.
 ```php
-function read_data( $post ) {
-	add_filter( 'my_data', function() use ( &$post ) {
-		return $post->post_content;
+function override_post_title() {
+	add_filter( 'getting_post_title', function() {
+		return 'something else';
 	} );
 }
 
-function return_data() {
-	return apply_filters( 'my_data', $post->post_content );
+function get_post_title( $post ) {
+	return apply_filters( 'getting_post_title', $post->post_title );
 }
 ```
-You can write tests to be sure the filter is added and applied.
+You can write tests to be sure the filter is applied.
 ```php
-mock_function( 'apply_filters' )->
-	when_called->with( 'my_data' )->will_return( 'foobar' );
-$this->assertEquals( 'foobar', return_data() );
+\Spies\mock_function( 'apply_filters' )->
+	when_called->with( 'getting_post_title', \Spies\any() )->
+	will_return( 'foobar' );
+$post = (object) [ 'post_title' => 'hello' ];
+$this->assertEquals( 'foobar', get_post_title( $post ) );
 ```
 					</script>
 				</section>
@@ -883,7 +885,7 @@ And big thanks to *you* for coming!
 					<script type="text/template">
 These slides:
 
-https://cloudup.com/cI0KYzp18YH
+https://payton.codes/testable-wordpress-plugins/
 
 👀
 
