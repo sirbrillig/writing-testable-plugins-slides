@@ -93,15 +93,22 @@ You want to know exactly what happened. Good unit tests will give you that.
 					<script type="text/template">
 ### Writing testable plugins? Why?
 
-Unit tests allow us to design the system we are building before we build it.
-
-<p class="fragment">
-As we build it we will probably want to change things.
-</p>
-
-<p class="fragment">
 Good unit tests allow us to safely change our code without breaking anything that came before.
+
+<p class="fragment">
+Writing unit tests can help us to make code that is safer and more reliable.
 </p>
+
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+
+Testable code is better code.
+
+<em>Even if there are no tests!</em>
+
 					</script>
 				</section>
 
@@ -110,7 +117,7 @@ Good unit tests allow us to safely change our code without breaking anything tha
 ### What is a unit test?
 
 <p class="fragment">
-Some code to test that one piece of a system operates as expected.
+Some code to run one piece of a system, proving that it operates as expected.
 </p>
 					</script>
 				</section>
@@ -142,14 +149,6 @@ Also, WordPress is a big unit!
 
 It's nice to be able to test a plugin  
 *without* WordPress.
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-### Note
-<p>You might not need unit tests!</p>
-<p>(But it can't hurt!)</p>
 					</script>
 				</section>
 
@@ -366,18 +365,27 @@ Where two classes interact, we can place a *mock*.
 					<script type="text/template">
 ### Mocks (aka Stubs):
 
-fake objects or functions that behave in a way we can control.
+Fake objects or functions that behave in a way we can control.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-There are lots of ways to make mock objects and functions.  
-but I'll suggest a library called `Spies`.
+There are lots of ways to make mock objects and functions, but I'll suggest a library called `Spies`.
 
 https://github.com/sirbrillig/spies
 
 (I wrote it.)
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Spies is a library that allows easily mocking functions within a test.
+
+You can use it with PHPUnit:
+
+https://phpunit.de/
 					</script>
 				</section>
 
@@ -434,7 +442,9 @@ $this->assertEquals( 'hello', $result );
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 2:</p>
-Don't use static functions except as generators.
+Don't use static functions,
+
+except as factories or pure functions.
 					</script>
 				</section>
 
@@ -450,9 +460,9 @@ They cannot easily be mocked.
 
 				<section data-markdown>
 					<script type="text/template">
-Generators are a shortcut for object creation.
+Factories are a shortcut for object creation.
 
-Static Generators are ok.
+Static factories are ok.
 
 ```php
 class MyPlugin {
@@ -473,8 +483,9 @@ They don't always need to be tested because we can test the object creation manu
 
 				<section data-markdown>
 					<script type="text/template">
-Static functions that have  
-no dependencies and no side-effects are ok.
+Static functions that have
+
+no dependencies and no side-effects are "Pure".
 
 ```php
 class MyPlugin {
@@ -600,7 +611,9 @@ Isn't that just style?
 
 				<section data-markdown>
 					<script type="text/template">
-A function name should tell you what inputs and outputs are expected.
+A function name should tell you what
+
+inputs and outputs are expected.
 
 <p class="fragment">
 Some great verbs are
@@ -618,15 +631,21 @@ Example: a shortcode handler
 
 👆
 
-- `my_shortcode` doesn't really say what it does.
-- `process_my_shortcode` is better, but still ambiguous about what the function returns.
-- `get_markup_from_shortcode` tells us what the input and output will be.
+What should we call it?
+
+<ul>
+<li class="fragment">`my_shortcode` doesn't really say what it does.</li>
+<li class="fragment">`process_my_shortcode` is better, but still ambiguous about what the function returns.</li>
+<li class="fragment">`get_markup_from_shortcode` tells us what the input and output will be. 💥</li>
+</ul>
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-If a function does too many things to name, consider splitting it.
+If a function does too many things to name,
+
+consider splitting it into multiple functions.
 					</script>
 				</section>
 
@@ -692,12 +711,14 @@ Consider all possible inputs and outputs.
 				<section data-markdown>
 					<script type="text/template">
 Check for errors from external functions.
+
+Lots of things can return `WP_Error`!
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-When testing (or in real life!), your data might be missing or incomplete.
+Your data might be missing or incomplete.
 					</script>
 				</section>
 
@@ -726,7 +747,9 @@ function get_post_title( $post_id ) {
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 8:</p>
-Whenever possible, write tests first.
+When changing code, change tests first.
+
+(And make sure they fail!)
 					</script>
 				</section>
 
@@ -789,7 +812,9 @@ An object that behaves like a function and which we can query to learn how it wa
 
 				<section data-markdown>
 					<script type="text/template">
-Here we use a spy to make sure a shortcode is added correctly.
+Here we use a spy to make sure
+
+a shortcode is added correctly.
 ```php
 function add_my_shortcode() {
 	add_shortcode(
@@ -803,11 +828,9 @@ $spy = \Spies\get_spy_for( 'add_shortcode' );
 
 add_my_shortcode();
 
-$this->assertTrue(
-	$spy->was_called_with(
-		'otherpages',
-		\Spies\any()
-	);
+$this->assertSpyWasCalledWith(
+	$spy,
+	[ 'otherpages', \Spies\any() ]
 );
 ```
 					</script>
@@ -852,7 +875,10 @@ https://googletesting.blogspot.co.uk/2015/04/just-say-no-to-more-end-to-end-test
 					<script type="text/template">
 Code is hard. You can't predict all possible situations.
 <p class="fragment">
-When you find a bug, write a test that causes it, and then fix the bug so the test passes.
+When you find a bug, write a test that causes it,
+</p>
+<p class="fragment">
+<em>and then fix the bug so the test passes</em>.
 </p>
 					</script>
 				</section>
@@ -885,7 +911,7 @@ And big thanks to *you* for coming!
 					<script type="text/template">
 These slides:
 
-https://payton.codes/testable-wordpress-plugins/
+https://sirbrillig.github.io/writing-testable-plugins-slides/#/
 
 👀
 
