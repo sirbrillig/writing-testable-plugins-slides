@@ -747,24 +747,49 @@ function get_post_title( $post_id ) {
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 8:</p>
-When changing code, change tests first.
-
-(And make sure they fail!)
+No side effects in constructors.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Tested code gives us confidence.
+Constructor functions should prepare code to be run, not run the code.
+
 <p class="fragment">
-It will work the way we expect.
+Constructors cannot be mocked.
 </p>
+
 <p class="fragment">
-(We have defined our expectations.)
+Constructors cannot return a value.
 </p>
-<p class="fragment">
-It can be refactored safely.
-</p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">🚫 Nope.</p>
+```php
+class PostStatusUpdater {
+	public function __construct( $post ) {
+		$this->post = $post;
+		$this->post->post_status = 'publish';
+		wp_update_post( $this->post );
+	}
+}
+```
+<p class="yay">🎉 Yay!</p>
+```php
+class PostStatusUpdater {
+	public function __construct( $post ) {
+		$this->post = $post;
+	}
+
+	function run() {
+		$this->post->post_status = 'publish';
+		return wp_update_post( $this->post );
+	}
+}
+```
 					</script>
 				</section>
 
@@ -839,47 +864,51 @@ $this->assertSpyWasCalledWith(
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 10:</p>
-Write only one assertion per test.
+No more than two arguments per function.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-A unit is one thing.
+Lots of arguments make a function's definition confusing and prone to bugs.
 
-A unit test should test that one thing.
-
-One function's *one input* and *one output*.
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-Can a function have more than one input or output?
-
-Write more than one test.
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-> "Unit tests isolate failures. Even if a product contains millions of lines of code, if a unit test fails, you only need to search that small unit under test to find the bug."
-
-<p class="attribution">
-https://googletesting.blogspot.co.uk/2015/04/just-say-no-to-more-end-to-end-tests.html
-</p>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-Code is hard. You can't predict all possible situations.
 <p class="fragment">
-When you find a bug, write a test that causes it,
+Skipping some arguments is hard when there are many.
 </p>
+
 <p class="fragment">
-<em>and then fix the bug so the test passes</em>.
+If you need more than two arguments, use an associative array with defaults.
 </p>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">🚫 Nope.</p>
+```php
+public function record_food_order( $first_name, $last_name, $appetizer = 'None', $drink = 'Water', $meal = 'Pasta', $dessert = 'None' ) {
+	...
+}
+record_food_order( 'Gandalf', 'Greyhame', 'None', 'Soda', 'Pasta', 'Pudding' );
+```
+<p class="yay">🎉 Yay!</p>
+```php
+public function record_food_order( $choices ) {
+	$defaults = [ 'first_name' => null, 'last_name' => null, 'appetizer' => 'None', 'drink' => 'Water', 'meal' => 'Pasta', 'dessert' => 'None' ];
+	$choices = array_merge( $defaults, $choices );
+	if ( empty( $choices['first_name'] ) || empty( $choices['last_name'] ) ) {
+		return new WP_Error( 'missing_data', 'Missing required name arguments.' );
+	}
+	...
+}
+record_food_order( [
+	'first_name' => 'Gandalf',
+	'last_name' => 'Greyhame',
+	'drink' => 'Soda',
+	'meal' => 'Pasta',
+	'dessert' => 'Pudding',
+] );
+```
 					</script>
 				</section>
 
@@ -892,17 +921,6 @@ Confidence, safety, readability.
 </p>
 <p class="fragment">
 An investment in the future of your code.
-</p>
-					</script>
-				</section>
-
-				<section data-markdown>
-					<script type="text/template">
-🙇 🙇 🙇
-
-Big thanks to the WordPress.com REST API test suite, and all its overworked, under-appreciated maintainers.
-<p class="yay fragment">
-And big thanks to *you* for coming!
 </p>
 					</script>
 				</section>
