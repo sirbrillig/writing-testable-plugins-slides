@@ -46,6 +46,9 @@
 .reveal .list {
 	text-align: left;
 }
+.reveal .precept-list li {
+	font-size: 0.9em;
+}
 		</style>
 	</head>
 	<body>
@@ -911,6 +914,26 @@ record_food_order( [
 ```
 					</script>
 				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### Payton's <span class="yay">Testable</span> Precepts
+
+<ol class="precept-list">
+<li>Always use classes, never global functions.</li>
+<li>Don't use static functions, except as factories or pure functions.</li>
+<li>Use instance variables as constants.</li>
+<li>Use filters to pass data indirectly.</li>
+<li>Use verbs in all function names.</li>
+<li>Keep functions below eight lines  and indentation below four levels.</li>
+<li>Consider all possible inputs and outputs.</li>
+<li>No side effects in constructors.</li>
+<li>Don't test the code from other libraries, but test the inputs and outputs.</li>
+<li>No more than two arguments per function.</li>
+</ol>
+					</script>
+				</section>
+
 
 				<section data-markdown>
 					<script type="text/template">
