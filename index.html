@@ -368,7 +368,9 @@ Where two classes interact, we can place a *mock*.
 					<script type="text/template">
 ### Mocks (aka Stubs):
 
-Fake objects or functions that behave in a way we can control.
+Fake objects or functions that behave
+
+in a way we can control.
 					</script>
 				</section>
 
@@ -542,33 +544,44 @@ class MyPlugin {
 				<section data-markdown>
 					<script type="text/template">
 <p class="precept">Precept 4:</p>
-Use filters to pass data indirectly.
+Use actions and filters to pass data indirectly.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Better to pass data directly, but...
+Calling functions indirectly is a form of "decoupling".
 
-🗣  👬 👬 👬 👬
+Just like using multiple classes, a function which calls another using an action or a filter is not really dependent on the other function.
+
+Both the caller and the callee can be mocked.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-Sometimes you need to get data from one place and have something else pick it up later.
+Use an action if you want to _do_ something.
 
-🗣  👬 🕗  👬 👬
+Use a filter if you need a return value.
 					</script>
 				</section>
 
 				<section data-markdown>
 					<script type="text/template">
-When passing data between functions indirectly, use a filter.
+Using an action to decouple a function call.
+```php
+function ensure_short_post_excerpt( $post ) {
+	$post->post_excerpt = substr( $post->post_content, 0, 140 );
+	return do_action( 'my_plugin_publish_post', $post );
+}
 
-Filters can be mocked.
+function publish_post( $post ) {
+	$post->post_status = 'publish';
+	return wp_update_post( $post );
+}
 
-<p class="fragment">(Thanks WordPress!)</p>
+add_action( 'my_plugin_publish_post', 'publish_post' );
+```
 					</script>
 				</section>
 
@@ -832,9 +845,9 @@ An object that behaves like a function and which we can query to learn how it wa
 
 				<section data-markdown>
 					<script type="text/template">
-(do a thing that calls a method)
+👩‍💻 Does a thing that calls a method...
 
-"Hey spy! Did that method get called the way we expected?"
+🕵️‍♀️ "Hey spy! Did that method get called the way we expected?"
 					</script>
 				</section>
 
@@ -923,9 +936,9 @@ record_food_order( [
 <li>Always use classes, never global functions.</li>
 <li>Don't use static functions, except as factories or pure functions.</li>
 <li>Use instance variables as constants.</li>
-<li>Use filters to pass data indirectly.</li>
+<li>Use actions and filters to pass data indirectly.</li>
 <li>Use verbs in all function names.</li>
-<li>Keep functions below eight lines  and indentation below four levels.</li>
+<li>Keep functions below eight lines and indentation below four levels.</li>
 <li>Consider all possible inputs and outputs.</li>
 <li>No side effects in constructors.</li>
 <li>Don't test the code from other libraries, but test the inputs and outputs.</li>
