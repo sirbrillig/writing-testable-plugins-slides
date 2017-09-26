@@ -543,6 +543,54 @@ class MyPlugin {
 
 				<section data-markdown>
 					<script type="text/template">
+This is even worse when a constant is used as a condition.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="nope">🚫 Untestable!</p>
+```php
+define( 'IS_RUNNING', true );
+
+class MyPlugin {
+	public function get_data() {
+		if ( defined( 'IS_RUNNING' ) && IS_RUNNING ) {
+			return file_get_contents( DATA_DIR . '/data.txt' );
+		}
+	}
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+Constants as aliases for unchanging values are ok.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<p class="yay">🎉 Yay!</p>
+```php
+define( 'MAX_BOTTLES_OF_BEER', 99 );
+
+class MyPlugin {
+	public function get_next_bottle() {
+		if ( $this->current_bottle_index > MAX_BOTTLES_OF_BEER ) {
+			return MAX_BOTTLES_OF_BEER;
+		}
+		$this->current_bottle_index++;
+		return $this->current_bottle_index;
+	}
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
 <p class="precept">Precept 4:</p>
 Use actions and filters to pass data indirectly.
 					</script>
