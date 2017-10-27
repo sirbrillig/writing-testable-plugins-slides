@@ -245,7 +245,7 @@ class MyPlugin {
 	public $updater;
 
 	public function __construct( $updater = null ) {
-		$this->updater = $updater ? $updater : new Updater();
+		$this->updater = $updater ?? new Updater();
 	}
 
 	public function update_post_status( $post_id ) {
@@ -422,7 +422,7 @@ class MyPlugin {
 	public $getter;
 
 	public function __construct( $getter = null ) {
-		$this->getter = $getter ? $getter : new Getter();
+		$this->getter = $getter ?? new Getter();
 	}
 
 	public function get_data_content() {
